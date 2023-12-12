@@ -1,3 +1,6 @@
+#This is a simple password strength checkin script.  
+#It is currently set to verify if a password is at least 8 characters long and contains an uppercase letter, a lowercase letter, a number, and a special character.
+
 import sys
 import getpass
 
