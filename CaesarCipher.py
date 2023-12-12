@@ -1,3 +1,5 @@
+#This is a simple Caesar Cipher script.  It allows for both encrypting and decrypting messages with a custom rotation value.
+
 import sys
 
 
