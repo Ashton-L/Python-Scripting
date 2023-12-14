@@ -1,3 +1,7 @@
+#This is a basic web scraper script that scrapes the first page of the top 20 trending data sets from Data.gov.
+#The scraper will pull the title, jurisdiction, organization, and description of the data set.
+#The data is exported into a csv file named "Data.gov scrape.csv"
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -39,4 +43,4 @@ data = {
 }
 
 df = pd.DataFrame(data)
-df.to_csv('Data.gov data.csv', index=False)
+df.to_csv('Data.gov scrape.csv', index=False)
