@@ -1,46 +1,51 @@
 #This is a basic web scraper script that scrapes the first page of the top 20 trending data sets from Data.gov.
-#The scraper will pull the title, jurisdiction, organization, and description of the data set.
+#The scraper will pull the title, organization type, organization, and description of the data set.
 #The data is exported into a csv file named "Data.gov scrape.csv"
 
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 
-url = "http://catalog.data.gov/dataset"
-r = requests.get(url)
-html = r.text
-soup = BeautifulSoup(html, "html.parser")
+def get_soup(url):
+    response = requests.get(url)
+    if response.status_code == 200:
+        return BeautifulSoup(response.text, "html.parser")
+    else:
+        raise exception(f'Failed to retrieve page; status code {response.status_code}')
 
-title_lines = soup.find_all('h3', class_="dataset-heading")
-titles = []
-for line in title_lines:
-    title = line.find('a')
-    if title:
-        titles.append(title.text.strip())
+def scrape_titles(soup):
+    title_lines = soup.find_all('h3', class_="dataset-heading")
+    titles = [line.find('a').text.strip() for line in title_lines]
+    return titles
 
-org_type_lines = soup.find_all('div', class_="organization-type-wrap")
-org_type = []
-for line in org_type_lines:
-    org = line.find('span')
-    if org:
-        org_type.append(org.text.strip())
+def scrape_org_type(soup):
+    org_type_lines = soup.find_all('div', class_="organization-type-wrap")
+    org_type = [line.find('span').text.strip() for line in org_type_lines]
+    return org_type
 
-organizations_and_description_lines = soup.find_all('div', class_="notes")
-organizations = []
-descriptions = []
-for line in organizations_and_description_lines:
-    organization = line.find('p')
-    description = line.find('div')
-    if organization and description:
-        organizations.append(organization.text.strip(' —'))
-        descriptions.append(description.text.strip())
+def scrape_organizations_and_descriptions(soup):
+    lines = soup.find_all('div', class_="notes")
+    organizations = [line.find('p').text.strip(' —') for line in lines]
+    descriptions = [line.find('div').text.strip() for line in lines]
+    return organizations, descriptions
 
-data = {
-    'Title': titles,
-    'Data Jurisdiction Type': org_type,
-    'Organization': organizations,
-    'Description': descriptions,
-}
+def main():
+    url = "http://catalog.data.gov/dataset"
+    soup = get_soup(url)
 
-df = pd.DataFrame(data)
-df.to_csv('Data.gov scrape.csv', index=False)
+    titles = scrape_titles(soup)
+    org_type = scrape_org_type(soup)
+    organizations, descriptions = scrape_organizations_and_descriptions(soup)
+
+    data = {
+        'Title': titles,
+        'Data Jurisdiction Type': org_type,
+        'Organization': organizations,
+        'Description': descriptions,
+    }
+
+    df = pd.DataFrame(data)
+    df.to_csv('Data.gov_scrape.csv', index=False)
+
+if __name__ == "__main__":
+    main()
